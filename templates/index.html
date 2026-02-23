@@ -104,7 +104,7 @@
         /* Hero/Banner Section */
         .hero-section {
             background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
-                        url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=500&fit=crop') center/cover;
+                        url('https://png.pngtree.com/background/20230527/original/pngtree-computer-store-with-many-computers-and-displays-picture-image_2759015.jpg') center/cover;
             height: 500px;
             display: flex;
             align-items: center;
@@ -232,6 +232,97 @@
             font-size: 12px;
             font-weight: 600;
             z-index: 10;
+        }
+
+        .product-badge.sale-badge {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF1744 100%);
+            animation: saleBadgePulse 2s infinite;
+        }
+
+        @keyframes saleBadgePulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .discount-badge {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: #FFC107;
+            color: #333;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Category Filter */
+        .category-filter {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .filter-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-item:hover {
+            background-color: var(--light-color);
+        }
+
+        .filter-item input[type="radio"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            accent-color: var(--primary-color);
+        }
+
+        .filter-label {
+            font-size: 15px;
+            color: var(--dark-color);
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .product-price-original {
+            font-size: 14px;
+            color: #999;
+            text-decoration: line-through;
+            margin-bottom: 5px;
         }
 
         .product-body {
@@ -401,6 +492,10 @@
             .product-card {
                 margin-bottom: 30px;
             }
+
+            .category-filter {
+                margin-bottom: 30px;
+            }
         }
     </style>
 </head>
@@ -462,35 +557,110 @@
         <div class="container">
             <h2 class="section-title">สินค้าแนะนำ</h2>
             
-            <div class="row g-4">
-                {% for product in products %}
-                <!-- Product Card - {{ product.id }} -->
-                <div class="col-lg-3 col-md-6">
-                    <div class="product-card">
-                        <div style="position: relative;">
-                            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
-                            <span class="product-badge">New</span>
-                        </div>
-                        <div class="product-body">
-                            <p class="product-category">Featured Product</p>
-                            <h5 class="product-name">{{ product.name }}</h5>
-                            <p class="product-description">สินค้าคุณภาพดี มาจากฐานข้อมูล Mark Shop</p>
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span>(0 รีวิว)</span>
-                            </div>
-                            <div class="product-price">฿{{ "%.2f"|format(product.price) }}</div>
-                            <button class="btn-add-cart" onclick="addToCart({{ product.id }}, '{{ product.name }}', {{ product.price }}, '{{ product.image_url }}')">
-                                <i class="fas fa-cart-plus"></i> เพิ่มลงตะกร้า
-                            </button>
+            <div class="row">
+                <!-- Sidebar - Category Filter -->
+                <div class="col-lg-3 col-md-4">
+                    <div class="category-filter">
+                        <h5 class="filter-title">
+                            <i class="fas fa-filter"></i> กรองตามหมวดหมู่
+                        </h5>
+                        <div class="filter-group">
+                            <label class="filter-item">
+                                <input 
+                                    type="radio" 
+                                    name="category-filter" 
+                                    value="all" 
+                                    checked
+                                    onchange="filterProducts(this.value)"
+                                >
+                                <span class="filter-label">ทั้งหมด</span>
+                            </label>
+                            <label class="filter-item">
+                                <input 
+                                    type="radio" 
+                                    name="category-filter" 
+                                    value="Electronics"
+                                    onchange="filterProducts(this.value)"
+                                >
+                                <span class="filter-label">
+                                    <i class="fas fa-plug"></i> อิเล็กทรอนิกส์
+                                </span>
+                            </label>
+                            <label class="filter-item">
+                                <input 
+                                    type="radio" 
+                                    name="category-filter" 
+                                    value="Computers"
+                                    onchange="filterProducts(this.value)"
+                                >
+                                <span class="filter-label">
+                                    <i class="fas fa-laptop"></i> คอมพิวเตอร์
+                                </span>
+                            </label>
+                            <label class="filter-item">
+                                <input 
+                                    type="radio" 
+                                    name="category-filter" 
+                                    value="Cameras"
+                                    onchange="filterProducts(this.value)"
+                                >
+                                <span class="filter-label">
+                                    <i class="fas fa-camera"></i> กล้อง
+                                </span>
+                            </label>
                         </div>
                     </div>
                 </div>
-                {% endfor %}
+
+                <!-- Products Grid -->
+                <div class="col-lg-9 col-md-8">
+                    <div class="row g-4" id="products-grid">
+                        {% for product in products %}
+                        <!-- Product Card - {{ product.id }} -->
+                        <div class="col-lg-4 col-md-6 product-item" data-category="{{ product.category }}">
+                            <div class="product-card">
+                                <div style="position: relative;">
+                                    <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
+                                    {% if product.is_sale %}
+                                    <span class="product-badge sale-badge">Sale</span>
+                                    {% else %}
+                                    <span class="product-badge">New</span>
+                                    {% endif %}
+                                    {% if product.discount > 0 %}
+                                    <span class="discount-badge">-{{ product.discount|int }}%</span>
+                                    {% endif %}
+                                </div>
+                                <div class="product-body">
+                                    <p class="product-category">{{ product.category }}</p>
+                                    <h5 class="product-name">{{ product.name }}</h5>
+                                    <p class="product-description">สินค้าคุณภาพดี มาจากฐานข้อมูล Mark Shop</p>
+                                    <div class="product-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                        <span>(0 รีวิว)</span>
+                                    </div>
+                                    {% if product.discount > 0 %}
+                                    <div class="product-price-original">
+                                        ฿{{ "%.2f"|format(product.price) }}
+                                    </div>
+                                    <div class="product-price">
+                                        ฿{{ "%.2f"|format(product.price * (1 - product.discount / 100)) }}
+                                    </div>
+                                    {% else %}
+                                    <div class="product-price">฿{{ "%.2f"|format(product.price) }}</div>
+                                    {% endif %}
+                                    <button class="btn-add-cart" onclick="addToCart({{ product.id }}, '{{ product.name }}', {{ product.price * (1 - product.discount / 100) if product.discount > 0 else product.price }}, '{{ product.image_url }}')">
+                                        <i class="fas fa-cart-plus"></i> เพิ่มลงตะกร้า
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -591,6 +761,23 @@
             }
         }
 
+        // Filter products by category
+        function filterProducts(category) {
+            const productItems = document.querySelectorAll('.product-item');
+            productItems.forEach(item => {
+                if (category === 'all' || item.dataset.category === category) {
+                    item.style.display = 'block';
+                    // Trigger animation
+                    item.style.animation = 'none';
+                    setTimeout(() => {
+                        item.style.animation = 'fadeIn 0.5s ease-in';
+                    }, 10);
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
         // Add product to cart
         function addToCart(id, name, price, imageUrl) {
             const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -665,7 +852,7 @@
         // Update cart badge on page load
         window.addEventListener('load', updateCartBadge);
 
-        // Add CSS animation
+        // Add CSS animations
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideInRight {
@@ -676,6 +863,17 @@
                 to {
                     transform: translateX(0);
                     opacity: 1;
+                }
+            }
+            
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
                 }
             }
         `;

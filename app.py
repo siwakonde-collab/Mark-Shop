@@ -23,6 +23,13 @@ class Product(db.Model):
     name = db.Column(db.String(120), nullable=False)
     price = db.Column(db.Float, nullable=False)
     image_url = db.Column(db.String(500), nullable=False)
+    category = db.Column(db.String(50), default='Electronics')  # Electronics, Computers, Cameras
+    discount = db.Column(db.Float, default=0)  # ส่วนลดเป็นเปอร์เซ็นต์
+    is_sale = db.Column(db.Boolean, default=False)  # Flag สำหรับแสดง Sale badge
+    
+    def get_discounted_price(self):
+        """คำนวณราคาหลังลดราคา"""
+        return self.price * (1 - self.discount / 100)
     
     def to_dict(self):
         """แปลง Product object เป็น dictionary"""
@@ -30,7 +37,11 @@ class Product(db.Model):
             'id': self.id,
             'name': self.name,
             'price': self.price,
-            'image_url': self.image_url
+            'image_url': self.image_url,
+            'category': self.category,
+            'discount': self.discount,
+            'is_sale': self.is_sale,
+            'discounted_price': self.get_discounted_price()
         }
     
     def __repr__(self):
@@ -49,6 +60,12 @@ def index():
 def cart():
     """หน้าตะกร้าสินค้า"""
     return render_template('cart.html')
+
+
+@app.route('/checkout')
+def checkout():
+    """หน้าชำระเงิน"""
+    return render_template('checkout.html')
 
 
 @app.route('/api/products', methods=['GET'])
@@ -114,6 +131,12 @@ def update_product(product_id):
             product.price = data['price']
         if 'image_url' in data:
             product.image_url = data['image_url']
+        if 'category' in data:
+            product.category = data['category']
+        if 'discount' in data:
+            product.discount = data['discount']
+        if 'is_sale' in data:
+            product.is_sale = data['is_sale']
         
         db.session.commit()
         
@@ -198,6 +221,9 @@ def add_product_admin():
             name = request.form.get('name')
             price = request.form.get('price')
             image_url = request.form.get('image_url')
+            category = request.form.get('category', 'Electronics')
+            discount = request.form.get('discount', 0)
+            is_sale = request.form.get('is_sale') == 'on'
             
             # ตรวจสอบข้อมูล
             if not name or not price or not image_url:
@@ -208,7 +234,10 @@ def add_product_admin():
             new_product = Product(
                 name=name,
                 price=float(price),
-                image_url=image_url
+                image_url=image_url,
+                category=category,
+                discount=float(discount) if discount else 0,
+                is_sale=is_sale
             )
             
             # บันทึกลง Database
@@ -219,7 +248,7 @@ def add_product_admin():
         
         except ValueError:
             return render_template('admin-add-product.html', 
-                                 error='ราคาต้องเป็นตัวเลข')
+                                 error='ราคาและส่วนลดต้องเป็นตัวเลข')
         except Exception as e:
             db.session.rollback()
             return render_template('admin-add-product.html', 
@@ -263,22 +292,34 @@ def seed_sample_data():
             Product(
                 name="หูฟังไร้สาย Premium",
                 price=2490.00,
-                image_url="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=250&fit=crop"
+                image_url="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=250&fit=crop",
+                category="Electronics",
+                discount=15,
+                is_sale=True
             ),
             Product(
                 name="นาฬิกาสมาร์ทวอทช์",
                 price=4990.00,
-                image_url="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=250&fit=crop"
+                image_url="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=250&fit=crop",
+                category="Electronics",
+                discount=0,
+                is_sale=False
             ),
             Product(
                 name="กระเป๋า Camera Bag",
                 price=1890.00,
-                image_url="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=250&fit=crop"
+                image_url="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=250&fit=crop",
+                category="Cameras",
+                discount=20,
+                is_sale=True
             ),
             Product(
                 name="แว่นตากันแดด",
                 price=3290.00,
-                image_url="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=250&fit=crop"
+                image_url="https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=250&fit=crop",
+                category="Computers",
+                discount=10,
+                is_sale=True
             )
         ]
         
@@ -290,7 +331,8 @@ def seed_sample_data():
             print("✅ Sample products inserted successfully!")
             print(f"📦 Added {len(sample_products)} products to database:")
             for product in sample_products:
-                print(f"   - {product.name} (฿{product.price:.2f})")
+                discount_info = f" (ลดราคา {product.discount}%)" if product.discount > 0 else ""
+                print(f"   - {product.name} (฿{product.price:.2f}) [{product.category}]{discount_info}")
         
         except Exception as e:
             db.session.rollback()

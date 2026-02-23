@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ชำระเงิน - Mark Shop</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --dark-color: #2D3436;
+            --light-color: #F8F9FA;
+            --danger-color: #E74C3C;
+            --success-color: #27AE60;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+        }
+
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: 700;
+            color: white !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-nav .nav-link {
+            color: white !important;
+            font-weight: 500;
+            margin: 0 15px;
+            transition: all 0.3s ease;
+        }
+
+        /* Main Content */
+        .checkout-container {
+            padding: 40px 0;
+            min-height: 80vh;
+        }
+
+        .page-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: var(--dark-color);
+            text-align: center;
+        }
+
+        /* Steps Indicator */
+        .steps-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            gap: 20px;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-weight: 700;
+            color: #999;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .step.active .step-circle {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .step-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #999;
+        }
+
+        .step.active .step-title {
+            color: var(--primary-color);
+        }
+
+        .step-line {
+            position: absolute;
+            top: 25px;
+            left: -50%;
+            width: 100%;
+            height: 3px;
+            background: #e0e0e0;
+            z-index: -1;
+        }
+
+        .step:first-child .step-line {
+            display: none;
+        }
+
+        /* Form Sections */
+        .checkout-form {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .form-section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-section-title i {
+            color: var(--primary-color);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark-color);
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .required-field {
+            color: var(--danger-color);
+        }
+
+        /* Payment Methods */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .payment-method {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .payment-method:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.15);
+        }
+
+        .payment-method input[type="radio"] {
+            display: none;
+        }
+
+        .payment-method input[type="radio"]:checked + label {
+            color: white;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+
+        .payment-method-label {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin: 0;
+        }
+
+        .payment-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+        }
+
+        .payment-method input[type="radio"]:checked ~ .payment-icon {
+            color: white;
+        }
+
+        .payment-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--dark-color);
+        }
+
+        .payment-method input[type="radio"]:checked ~ .payment-name {
+            color: white;
+        }
+
+        .payment-desc {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .payment-method input[type="radio"]:checked ~ .payment-desc {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Order Summary */
+        .order-summary {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .summary-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-title i {
+            color: var(--primary-color);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .item-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid #e0e0e0;
+        }
+
+        .item-details h6 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--dark-color);
+        }
+
+        .item-details p {
+            margin: 3px 0 0 0;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: var(--success-color);
+            white-space: nowrap;
+            margin-left: 15px;
+        }
+
+        .summary-totals {
+            margin-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            padding-top: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .summary-row.total {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--success-color);
+        }
+
+        /* Buttons */
+        .checkout-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 14px 30px;
+            background: linear-gradient(135deg, var(--success-color) 0%, #229954 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-back {
+            flex: 1;
+            padding: 14px 30px;
+            background-color: #e0e0e0;
+            color: var(--dark-color);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            background-color: #d0d0d0;
+            color: var(--dark-color);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 60px 0 20px;
+            margin-top: 80px;
+        }
+
+        .footer-section {
+            margin-bottom: 40px;
+        }
+
+        .footer-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .footer-content {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #444;
+            padding-top: 20px;
+            margin-top: 40px;
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+
+            .checkout-form {
+                padding: 20px;
+            }
+
+            .order-summary {
+                padding: 20px;
+                margin-top: 30px;
+            }
+
+            .checkout-buttons {
+                flex-direction: column;
+            }
+
+            .steps-indicator {
+                gap: 10px;
+            }
+
+            .step-title {
+                font-size: 12px;
+            }
+
+            .page-title {
+                font-size: 28px;
+                margin-bottom: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shopping-bag"></i>
+                Mark Shop
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/cart">
+                            <i class="fas fa-shopping-cart"></i> Cart
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container checkout-container">
+        <h1 class="page-title">
+            <i class="fas fa-credit-card"></i> ชำระเงิน
+        </h1>
+
+        <!-- Steps Indicator -->
+        <div class="steps-indicator">
+            <div class="step active">
+                <div class="step-circle">1</div>
+                <div class="step-title">ข้อมูลลูกค้า</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="step active">
+                <div class="step-circle">2</div>
+                <div class="step-title">วิธีการชำระเงิน</div>
+                <div class="step-line"></div>
+            </div>
+            <div class="step">
+                <div class="step-circle">3</div>
+                <div class="step-title">สำเร็จ</div>
+                <div class="step-line"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Form Section -->
+            <div class="col-lg-8">
+                <!-- Customer Information -->
+                <div class="checkout-form">
+                    <div class="form-section-title">
+                        <i class="fas fa-user"></i> ข้อมูลลูกค้า
+                    </div>
+
+                    <form id="checkoutForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="firstName">ชื่อจริง <span class="required-field">*</span></label>
+                                <input type="text" id="firstName" name="firstName" placeholder="เช่น สมชาย" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">นามสกุล <span class="required-field">*</span></label>
+                                <input type="text" id="lastName" name="lastName" placeholder="เช่น ใจดี" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">อีเมล <span class="required-field">*</span></label>
+                                <input type="email" id="email" name="email" placeholder="email@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">เบอร์โทรศัพท์ <span class="required-field">*</span></label>
+                                <input type="tel" id="phone" name="phone" placeholder="08X-XXXX-XXXX" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row full">
+                            <div class="form-group">
+                                <label for="address">ที่อยู่ <span class="required-field">*</span></label>
+                                <textarea id="address" name="address" placeholder="เช่น 123 ถนนสุขุมวิท แขวงพระแค้ว เขตวัฒนา กรุงเทพ 10110" required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Payment Methods -->
+                        <div style="margin-top: 40px;">
+                            <div class="form-section-title">
+                                <i class="fas fa-credit-card"></i> วิธีการชำระเงิน
+                            </div>
+
+                            <div class="payment-methods">
+                                <!-- Cash on Delivery -->
+                                <div class="payment-method">
+                                    <input type="radio" id="cod" name="payment-method" value="cod" checked>
+                                    <label for="cod" class="payment-method-label">
+                                        <div class="payment-icon">
+                                            <i class="fas fa-hand-holding-usd"></i>
+                                        </div>
+                                        <div class="payment-name">เก็บเงินปลายทาง</div>
+                                        <div class="payment-desc">COD</div>
+                                    </label>
+                                </div>
+
+                                <!-- Prompt Pay -->
+                                <div class="payment-method">
+                                    <input type="radio" id="promptpay" name="payment-method" value="promptpay">
+                                    <label for="promptpay" class="payment-method-label">
+                                        <div class="payment-icon">
+                                            <i class="fas fa-qrcode"></i>
+                                        </div>
+                                        <div class="payment-name">Prompt Pay</div>
+                                        <div class="payment-desc">QR Code</div>
+                                    </label>
+                                </div>
+
+                                <!-- Mobile Banking -->
+                                <div class="payment-method">
+                                    <input type="radio" id="mobilebanking" name="payment-method" value="mobilebanking">
+                                    <label for="mobilebanking" class="payment-method-label">
+                                        <div class="payment-icon">
+                                            <i class="fas fa-mobile-alt"></i>
+                                        </div>
+                                        <div class="payment-name">Mobile Banking</div>
+                                        <div class="payment-desc">โอนเงิน</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="checkout-buttons">
+                            <a href="/cart" class="btn-back">
+                                <i class="fas fa-arrow-left"></i> กลับไปตะกร้า
+                            </a>
+                            <button type="submit" class="btn-submit">
+                                <i class="fas fa-check-circle"></i> ยืนยันการสั่งซื้อ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Order Summary Section -->
+            <div class="col-lg-4">
+                <div class="order-summary">
+                    <div class="summary-title">
+                        <i class="fas fa-list"></i> สรุปคำสั่งซื้อ
+                    </div>
+
+                    <div id="summary-items">
+                        <!-- Summary items will be populated here by JavaScript -->
+                    </div>
+
+                    <div class="summary-totals">
+                        <div class="summary-row">
+                            <span>รวมสินค้า:</span>
+                            <span id="subtotal">฿0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>ค่าจัดส่ง:</span>
+                            <span>฿0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>ส่วนลด:</span>
+                            <span>฿0.00</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>ทั้งหมด:</span>
+                            <span id="total">฿0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="footer-section">
+                        <h5 class="footer-title">Mark Shop</h5>
+                        <p class="footer-content">ร้านค้าออนไลน์ที่ให้บริการสินค้าคุณภาพดี</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="footer-section">
+                        <h5 class="footer-title">ติดต่อเรา</h5>
+                        <p class="footer-content">
+                            <i class="fas fa-phone"></i> 021-2345678<br>
+                            <i class="fas fa-envelope"></i> info@markshop.com
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Mark Shop. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Load cart and display summary
+        function loadCheckout() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            
+            if (cart.length === 0) {
+                document.getElementById('summary-items').innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #999;">
+                        <i class="fas fa-inbox" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
+                        <p>ตะกร้าว่างเปล่า</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let summaryHtml = '';
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                const subtotal = item.price * item.quantity;
+                total += subtotal;
+
+                summaryHtml += `
+                    <div class="summary-item">
+                        <div class="item-info">
+                            <img src="${item.image_url}" alt="${item.name}" class="item-image">
+                            <div class="item-details">
+                                <h6>${item.name}</h6>
+                                <p>จำนวน: ${item.quantity} ชิ้น</p>
+                            </div>
+                        </div>
+                        <div class="item-price">฿${subtotal.toFixed(2)}</div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('summary-items').innerHTML = summaryHtml;
+            document.getElementById('subtotal').textContent = `฿${total.toFixed(2)}`;
+            document.getElementById('total').textContent = `฿${total.toFixed(2)}`;
+        }
+
+        // Handle form submission
+        document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                paymentMethod: document.querySelector('input[name="payment-method"]:checked').value
+            };
+
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+            if (cart.length === 0) {
+                alert('ตะกร้าว่างเปล่า');
+                return;
+            }
+
+            // Store order data
+            const orderData = {
+                customer: formData,
+                items: cart,
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                orderDate: new Date().toISOString()
+            };
+
+            localStorage.setItem('lastOrder', JSON.stringify(orderData));
+
+            // Show success message based on payment method
+            let successMessage = `ขอบคุณสำหรับการสั่งซื้อ!\n\n`;
+            successMessage += `ชื่อ: ${formData.firstName} ${formData.lastName}\n`;
+            successMessage += `อีเมล: ${formData.email}\n`;
+            successMessage += `โทร: ${formData.phone}\n\n`;
+            successMessage += `วิธีการชำระเงิน: `;
+
+            if (formData.paymentMethod === 'cod') {
+                successMessage += `เก็บเงินปลายทาง\nพนักงานจะติดต่อท่านต่อไป`;
+            } else if (formData.paymentMethod === 'promptpay') {
+                successMessage += `Prompt Pay\nสแกน QR Code: 915XXXXXXXXX`;
+            } else if (formData.paymentMethod === 'mobilebanking') {
+                successMessage += `Mobile Banking\nโอนไปที่: ธนาคาร XXXX`;
+            }
+
+            successMessage += `\n\nรหัสทำเนียบ: #ORD${Date.now()}`;
+
+            alert(successMessage);
+
+            // Clear cart and redirect
+            localStorage.removeItem('cart');
+            window.location.href = '/';
+        });
+
+        // Load checkout on page load
+        window.addEventListener('load', loadCheckout);
+    </script>
+
+</body>
+</html>
